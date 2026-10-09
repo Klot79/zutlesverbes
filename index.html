@@ -1,0 +1,259 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Zut, les verbes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito:wght@500;700&display=swap">
+<style>
+/* Layout: one game at a time, large tap targets for iPad (4 tabs on top, big answer buttons below). */
+:root{
+  --bg:#eef2fa; --surface:#ffffff; --fg:#1b2a4a; --muted:#5a6b8c; --line:#c6d2ea;
+  --accent:#2d55c4; --accent-fg:#ffffff;
+  --s-bg:#dbe8ff; --s-bd:#3a6fd8; --v-bg:#ffdcdc; --v-bd:#d84a4a; --c-bg:#dcf5dd; --c-bd:#3da34a; --q-bg:#ffe9d0; --q-bd:#e08a2a;
+  --ok:#2e8b3a; --ok-bg:#dcf5dd; --bad:#c23a3a; --bad-bg:#ffdcdc;
+  --display:'Baloo 2','Trebuchet MS',sans-serif; --body:'Nunito','Segoe UI',Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101a30; --surface:#18243f; --fg:#e8eefc; --muted:#9fb0d3; --line:#2f4170;
+    --accent:#7ea2ff; --accent-fg:#0d1730;
+    --s-bg:#233a6e; --s-bd:#6f9bff; --v-bg:#5a2a30; --v-bd:#ff7d7d; --c-bg:#21492b; --c-bd:#6fd081; --q-bg:#5a3d1c; --q-bd:#ffa94d;
+    --ok:#7fe08f; --ok-bg:#21492b; --bad:#ff8c8c; --bad-bg:#5a2a30; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101a30; --surface:#18243f; --fg:#e8eefc; --muted:#9fb0d3; --line:#2f4170;
+  --accent:#7ea2ff; --accent-fg:#0d1730;
+  --s-bg:#233a6e; --s-bd:#6f9bff; --v-bg:#5a2a30; --v-bd:#ff7d7d; --c-bg:#21492b; --c-bd:#6fd081; --q-bg:#5a3d1c; --q-bd:#ffa94d;
+  --ok:#7fe08f; --ok-bg:#21492b; --bad:#ff8c8c; --bad-bg:#5a2a30; color-scheme:dark;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:18px;padding-inline:16px;padding-block:14px 40px;}
+.wrap{max-width:760px;margin-inline:auto;}
+h1{font-family:var(--display);font-size:2rem;margin:0 0 2px;text-wrap:balance;}
+.sub{color:var(--muted);margin:0 0 14px;font-size:.95rem;}
+.tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:16px;}
+.tab{font:inherit;font-weight:700;border:2px solid var(--line);background:var(--surface);color:var(--fg);border-radius:14px;padding:12px 10px;cursor:pointer;min-height:52px;}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);}
+.tab:focus-visible,.opt:focus-visible,.btn:focus-visible,.piece:focus-visible{outline:3px solid var(--accent);outline-offset:2px;}
+.card{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:18px;}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+.task{font-family:var(--display);font-size:1.35rem;font-weight:700;}
+.score{color:var(--muted);font-variant-numeric:tabular-nums;}
+.bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin:6px 0 14px;}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s;}
+.prompt{font-family:var(--display);font-size:2rem;text-align:center;margin:14px 0 18px;min-height:2.6em;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;}
+.gap{display:inline-block;min-width:3.2ch;border-bottom:4px solid var(--accent);text-align:center;}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;}
+.opt{font:inherit;font-size:1.25rem;font-weight:700;border:2px solid var(--line);background:var(--surface);color:var(--fg);border-radius:14px;padding:16px 8px;cursor:pointer;min-height:64px;}
+.opt.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok);}
+.opt.bad{background:var(--bad-bg);border-color:var(--bad);color:var(--bad);}
+.msg{min-height:1.6em;text-align:center;margin:12px 0 0;font-weight:700;}
+.msg.ok{color:var(--ok);} .msg.bad{color:var(--bad);}
+.btn{font:inherit;font-weight:700;border:0;background:var(--accent);color:var(--accent-fg);border-radius:14px;padding:13px 22px;cursor:pointer;min-height:52px;}
+.btn.alt{background:transparent;color:var(--fg);border:2px solid var(--line);}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.pieces,.built{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:56px;}
+.built{border:2px dashed var(--line);border-radius:14px;padding:10px;margin-bottom:14px;align-items:center;}
+.piece{font:inherit;font-size:1.15rem;font-weight:700;border:2px solid;border-radius:12px;padding:10px 14px;cursor:pointer;color:var(--fg);}
+.piece.S{background:var(--s-bg);border-color:var(--s-bd);} .piece.V{background:var(--v-bg);border-color:var(--v-bd);}
+.piece.C{background:var(--c-bg);border-color:var(--c-bd);} .piece.Q{background:var(--q-bg);border-color:var(--q-bd);}
+.legend{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:12px;font-size:.85rem;}
+.legend span{border:2px solid;border-radius:10px;padding:2px 9px;}
+.end{text-align:center;}
+.end .big{font-family:var(--display);font-size:2.4rem;margin:6px 0;}
+.hint{color:var(--muted);font-size:.9rem;text-align:center;margin-top:10px;}
+@media (prefers-reduced-motion: reduce){.bar i{transition:none;}}
+</style>
+
+<div class="wrap">
+  <h1>Zut, les verbes !</h1>
+  <p class="sub">Atelier 4 · Üben mit dem iPad: dire, lire, écrire · Satzbau · eu / œu</p>
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <div class="card" id="game"></div>
+  <p class="hint">Tippe auf die richtige Antwort. Fertig? Trage deine Sterne auf deinen Laufzettel ein.</p>
+</div>
+
+<script>
+(function(){
+var GAMES = [
+  {id:'intrus', label:'Trouve l’intrus', task:'Quel mot est l’intrus ?'},
+  {id:'verbes', label:'Les verbes', task:'Choisis la bonne forme.'},
+  {id:'sons',   label:'eu ou œu ?', task:'Complète le mot.'},
+  {id:'phrases',label:'Les bandelettes', task:'Mets les bandelettes dans l’ordre.'}
+];
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e;}
+
+/* ---- data ---- */
+var INTRUS=[
+ {w:['ballon', 'piano', 'chat', 'garçon', 'livre', 'lire'],x:'lire',why:'lire est un verbe, les autres sont des noms.'},
+ {w:['lit', 'écris', 'dites', 'disons', 'écrivent', 'cahier'],x:'cahier',why:'cahier est un nom, les autres sont des verbes.'},
+ {w:['je', 'tu', 'nous', 'vous', 'elles', 'sur'],x:'sur',why:'sur est une préposition, les autres sont des pronoms.'},
+ {w:['sur', 'sous', 'dans', 'devant', 'derrière', 'chat'],x:'chat',why:'chat est un nom, les autres sont des prépositions.'},
+ {w:['petite', 'grande', 'verte', 'salé', 'sucré', 'un'],x:'un',why:'un est un article, les autres sont des adjectifs.'},
+ {w:['un', 'une', 'des', 'la', 'le', 'lit'],x:'lit',why:'lit est un verbe, les autres sont des articles.'},
+ {w:['lundi', 'mardi', 'jeudi', 'samedi', 'dimanche', 'piano'],x:'piano',why:'piano n’est pas un jour de la semaine.'},
+ {w:['content', 'heureux', 'fier', 'triste', 'jaloux', 'mardi'],x:'mardi',why:'mardi est un jour, les autres sont des émotions.'},
+ {w:['piano', 'violon', 'guitare', 'flûte', 'batterie', 'dimanche'],x:'dimanche',why:'dimanche n’est pas un instrument de musique.'},
+ {w:['lire', 'écrire', 'dire', 'faire', 'jouer', 'chat'],x:'chat',why:'chat est un nom, les autres sont des verbes.'},
+ {w:['le feu', 'le jeu', 'un peu', 'bleu', 'deux', 'un œuf'],x:'un œuf',why:'œuf s’écrit avec « œu », les autres avec « eu ».'},
+ {w:['le nœud', 'le bœuf', 'un œuf', 'la sœur', 'le cœur', 'le feu'],x:'le feu',why:'feu s’écrit avec « eu », les autres avec « œu ».'},
+ {w:['petit', 'grand', 'joli', 'heureux', 'nerveux', 'lire'],x:'lire',why:'lire est un verbe, les autres sont des adjectifs.'},
+ {w:['le', 'la', 'les', 'un', 'une', 'jeu'],x:'jeu',why:'jeu est un nom, les autres sont des articles.'},
+ {w:['nous', 'vous', 'ils', 'elle', 'je', 'livre'],x:'livre',why:'livre est un nom, les autres sont des pronoms.'},
+ {w:['écrivons', 'lisons', 'disons', 'mangeons', 'jouons', 'nous'],x:'nous',why:'nous est un pronom, les autres sont des verbes.'},
+ {w:['dans', 'sur', 'sous', 'avec', 'pour', 'lundi'],x:'lundi',why:'lundi est un jour, les autres sont des prépositions.'},
+ {w:['ballon', 'raquette', 'équipe', 'but', 'match', 'lisez'],x:'lisez',why:'lisez est un verbe, les autres sont des noms.'},
+ {w:['dis', 'lis', 'écris', 'dit', 'lit', 'livre'],x:'livre',why:'livre est un nom, les autres sont des verbes.'},
+ {w:['triste', 'fâché', 'content', 'énervé', 'effrayé', 'samedi'],x:'samedi',why:'samedi est un jour, les autres sont des émotions.'},
+ {w:['je lis', 'tu lis', 'il lit', 'nous lisons', 'vous lisez', 'il écrit'],x:'il écrit',why:'« il écrit » vient de écrire, les autres de lire.'},
+ {w:['il dit', 'nous disons', 'vous dites', 'ils disent', 'je dis', 'je lis'],x:'je lis',why:'« je lis » vient de lire, les autres de dire.'},
+ {w:['il écrit', 'nous écrivons', 'vous écrivez', 'ils écrivent', 'j’écris', 'il dit'],x:'il dit',why:'« il dit » vient de dire, les autres de écrire.'},
+ {w:['verte', 'rouge', 'bleue', 'jaune', 'grise', 'sous'],x:'sous',why:'sous est une préposition, les autres sont des adjectifs.'}
+];
+var CONJ={dire:['dis','dis','dit','disons','dites','disent'],lire:['lis','lis','lit','lisons','lisez','lisent'],'écrire':['écris','écris','écrit','écrivons','écrivez','écrivent']};
+var PRO=['Je','Tu','Il','Nous','Vous','Ils'];
+var VERBES=[];
+['dire','lire','écrire'].forEach(function(v){[0,1,2,3,4,5].forEach(function(i){
+  var p=PRO[i]; if(i===0&&v==='écrire') p='J’';
+  VERBES.push({v:v,i:i,p:p,a:CONJ[v][i]});
+});});
+['dire','lire','écrire'].forEach(function(v){[['Esma',2],['Moussa et Tina',5],['Tina et moi',3],['Toi et Moussa',4]].forEach(function(x){VERBES.push({v:v,i:x[1],p:x[0],a:CONJ[v][x[1]]});});});
+var SONS=[
+ {a:'eu',b:'le f_',w:'le feu'},{a:'eu',b:'bl_',w:'bleu'},{a:'eu',b:'j_di',w:'jeudi'},{a:'œu',b:'les _fs',w:'les œufs'},
+ {a:'eu',b:'un p_',w:'un peu'},{a:'eu',b:'le j_',w:'le jeu'},{a:'eu',b:'d_x',w:'deux'},{a:'eu',b:'v_x',w:'vieux'},
+ {a:'œu',b:'le n_d',w:'le nœud'},{a:'œu',b:'les b_fs',w:'les bœufs'},{a:'eu',b:'je v_x',w:'je veux'},{a:'eu',b:'il p_t',w:'il peut'},{a:'eu',b:'la fl_r',w:'la fleur'},
+ {a:'eu',b:'les y_x',w:'les yeux'},{a:'eu',b:'le chev_',w:'le cheveu'},{a:'eu',b:'la p_r',w:'la peur'},{a:'œu',b:'le c_r',w:'le cœur'},{a:'œu',b:'la s_r',w:'la sœur'},{a:'œu',b:'un _f',w:'un œuf'},{a:'œu',b:'le b_f',w:'le bœuf'},{a:'eu',b:'j_ne',w:'jeune'},{a:'eu',b:'h_reux',w:'heureux'},{a:'eu',b:'le nev_',w:'le neveu'},{a:'eu',b:'nerv_x',w:'nerveux'},{a:'œu',b:'un v_',w:'un vœu'}
+];
+var PHRASES=[
+ [['Esma','S'],['écrit','V'],['une lettre','C'],['à tante Aurore.','Q']],
+ [['Moussa','S'],['lit','V'],['une histoire','C'],['à sa sœur.','Q']],
+ [['Nous','S'],['disons','V'],['bonjour','C'],['à M. Pedro.','Q']],
+ [['Sophie','S'],['lit','V'],['un livre','C'],['à sa grand-mère.','Q']],
+ [['Tu','S'],['écris','V'],['un message','C'],['à André.','Q']],
+ [['Vous','S'],['dites','V'],['merci','C'],['à tante Célestine.','Q']],
+ [['Je','S'],['lis','V'],['une recette','C'],['à Jean-Lou.','Q']],
+ [['Tina et Esma','S'],['écrivent','V'],['un poème','C'],['à grand-père.','Q']],
+ [['Moussa','S'],['lit','V'],['un livre','C'],['à Tina.','Q']],
+ [['Esma','S'],['écrit','V'],['une carte','C'],['à sa sœur.','Q']],
+ [['Tina','S'],['dit','V'],['merci','C'],['à tante Aurore.','Q']],
+ [['Je','S'],['lis','V'],['une histoire','C'],['à mon frère.','Q']],
+ [['Tu','S'],['écris','V'],['une lettre','C'],['à tante Célestine.','Q']],
+ [['Nous','S'],['lisons','V'],['un poème','C'],['à M. Pedro.','Q']],
+ [['Vous','S'],['écrivez','V'],['un message','C'],['à Jean-Lou.','Q']],
+ [['Les enfants','S'],['disent','V'],['bonjour','C'],['à la maîtresse.','Q']],
+ [['André','S'],['lit','V'],['une recette','C'],['à sa grand-mère.','Q']],
+ [['Sophie et Moussa','S'],['écrivent','V'],['une carte','C'],['à leurs parents.','Q']],
+ [['J’','S'],['écris','V'],['un message','C'],['à André.','Q']],
+ [['Tu','S'],['dis','V'],['bonjour','C'],['à M. Pedro.','Q']],
+ [['Nous','S'],['écrivons','V'],['une histoire','C'],['à tante Aurore.','Q']],
+ [['Elles','S'],['lisent','V'],['un livre','C'],['à leur maîtresse.','Q']],
+ [['Esma et Tina','S'],['disent','V'],['merci','C'],['à grand-père.','Q']]
+];
+
+/* ---- shell ---- */
+var tabs=document.getElementById('tabs'), host=document.getElementById('game'), cur=null;
+GAMES.forEach(function(g){var b=el('button','tab',g.label);b.setAttribute('role','tab');b.id='tab-'+g.id;
+  b.addEventListener('click',function(){open(g.id);});tabs.appendChild(b);});
+
+function open(id){
+  cur=id;
+  GAMES.forEach(function(g){document.getElementById('tab-'+g.id).setAttribute('aria-selected',String(g.id===id));});
+  var g=GAMES.filter(function(x){return x.id===id;})[0];
+  var N=20;
+  var questions = id==='intrus'?shuffle(INTRUS).slice(0,N): id==='verbes'?shuffle(VERBES).slice(0,N): id==='sons'?shuffle(SONS).slice(0,N): shuffle(PHRASES).slice(0,N);
+  run(g,questions,N);
+}
+
+function run(g,qs,N){
+  var idx=0,score=0;
+  function frame(){
+    host.innerHTML='';
+    var top=el('div','top');top.appendChild(el('div','task',g.task));
+    var sc=el('div','score','Question '+(idx+1)+' / '+N+' · ★ '+score);top.appendChild(sc);host.appendChild(top);
+    var bar=el('div','bar');var i=el('i');i.style.width=(idx/N*100)+'%';bar.appendChild(i);host.appendChild(bar);
+  }
+  function next(){idx++; if(idx>=N) finish(); else show();}
+  function finish(){
+    host.innerHTML='';var d=el('div','end');
+    var stars=score>=N*0.9?'★★★':score>=N*0.6?'★★☆':'★☆☆';
+    d.appendChild(el('div','big',stars));
+    d.appendChild(el('div','task',score+' / '+N+' correct'));
+    d.appendChild(el('p','sub',score>=N*0.9?'Super ! Bravo !':score>=N*0.6?'Bien ! Encore une fois ?':'Courage ! Essaie encore une fois.'));
+    var r=el('div','row');var b=el('button','btn','Rejouer');b.addEventListener('click',function(){open(cur);});r.appendChild(b);
+    var o=el('button','btn alt','Autre jeu');o.addEventListener('click',function(){var k=GAMES.map(function(x){return x.id;});open(k[(k.indexOf(cur)+1)%k.length]);});r.appendChild(o);
+    d.appendChild(r);host.appendChild(d);
+  }
+  function answer(btns,btn,correct,msgEl,okText,badText,lock){
+    if(lock.done) return; lock.done=true;
+    btns.forEach(function(b){b.disabled=true;});
+    if(correct){btn.classList.add('ok');score++;msgEl.className='msg ok';msgEl.textContent=okText;}
+    else{btn.classList.add('bad');msgEl.className='msg bad';msgEl.textContent=badText;}
+    var r=el('div','row');var n=el('button','btn',idx+1>=N?'Résultat':'Suivant');n.addEventListener('click',next);r.appendChild(n);host.appendChild(r);n.focus();
+  }
+  function show(){
+    frame();var q=qs[idx],lock={done:false};
+    if(g.id==='intrus'){
+      host.appendChild(el('div','prompt','Un mot est différent.'));
+      var o=el('div','opts');var msg=el('p','msg');var btns=[];
+      shuffle(q.w).forEach(function(w){var b=el('button','opt',w);btns.push(b);
+        b.addEventListener('click',function(){
+          if(w===q.x){answer(btns,b,true,msg,'Juste ! '+q.why,'',lock);}
+          else{answer(btns,b,false,msg,'','Non. L’intrus est « '+q.x+' ». '+q.why,lock);
+            btns.forEach(function(x){if(x.textContent===q.x)x.classList.add('ok');});}
+        });o.appendChild(b);});
+      host.appendChild(o);host.appendChild(msg);
+    }
+    else if(g.id==='verbes'){
+      var p=el('div','prompt');p.appendChild(el('span','',q.p+' '));p.appendChild(el('span','gap','   '));p.appendChild(el('span','','('+q.v+')'));host.appendChild(p);
+      var pool=[];Object.keys(CONJ).forEach(function(k){CONJ[k].forEach(function(f){if(pool.indexOf(f)<0&&f!==q.a)pool.push(f);});});
+      var same=CONJ[q.v].filter(function(f){return f!==q.a;});
+      var wrong=shuffle(same).slice(0,2).concat(shuffle(pool).slice(0,1));
+      wrong=wrong.filter(function(v,i,a){return a.indexOf(v)===i;}).slice(0,3);
+      var o=el('div','opts');var msg=el('p','msg');var btns=[];
+      shuffle([q.a].concat(wrong)).forEach(function(w){var b=el('button','opt',w);btns.push(b);
+        b.addEventListener('click',function(){
+          if(w===q.a) answer(btns,b,true,msg,'Juste ! '+q.p+' '+q.a+'.','',lock);
+          else{answer(btns,b,false,msg,'','Non. La bonne forme : '+q.p+' '+q.a+'.',lock);btns.forEach(function(x){if(x.textContent===q.a)x.classList.add('ok');});}
+        });o.appendChild(b);});
+      host.appendChild(o);host.appendChild(msg);
+    }
+    else if(g.id==='sons'){
+      var p=el('div','prompt');var parts=q.b.split('_');p.appendChild(el('span','',parts[0]));p.appendChild(el('span','gap','  '));p.appendChild(el('span','',parts[1]));host.appendChild(p);
+      var o=el('div','opts');var msg=el('p','msg');var btns=[];
+      ['eu','œu'].forEach(function(w){var b=el('button','opt',w);btns.push(b);
+        b.addEventListener('click',function(){
+          if(w===q.a) answer(btns,b,true,msg,'Juste ! '+q.w,'',lock);
+          else{answer(btns,b,false,msg,'','Non. On écrit : '+q.w,lock);btns.forEach(function(x){if(x.textContent===q.a)x.classList.add('ok');});}
+        });o.appendChild(b);});
+      host.appendChild(o);host.appendChild(msg);
+    }
+    else {
+      var lg=el('div','legend');[['Sujet','--s-bd'],['Verbe','--v-bd'],['Complément','--c-bd'],['à qui ?','--q-bd']].forEach(function(l){var s=el('span','',l[0]);s.style.borderColor='var('+l[1]+')';lg.appendChild(s);});
+      host.appendChild(lg);
+      var built=el('div','built');var pcs=el('div','pieces');var msg=el('p','msg');
+      host.appendChild(built);host.appendChild(pcs);host.appendChild(msg);
+      var placed=[];
+      function draw(){
+        built.innerHTML='';pcs.innerHTML='';
+        if(!placed.length) built.appendChild(el('span','score','Tape sur les bandelettes dans le bon ordre.'));
+        placed.forEach(function(p,i){var b=el('button','piece '+p[1],p[0]);b.addEventListener('click',function(){if(lock.done)return;placed.splice(i,1);avail.push(p);draw();});built.appendChild(b);});
+        avail.forEach(function(p,i){var b=el('button','piece '+p[1],p[0]);b.addEventListener('click',function(){if(lock.done)return;avail.splice(i,1);placed.push(p);draw();
+          if(!avail.length){
+            var ok=placed.every(function(x,k){return x[0]===q[k][0];});
+            lock.done=true;
+            if(ok){score++;msg.className='msg ok';msg.textContent='Juste ! '+q.map(function(x){return x[0];}).join(' ');}
+            else{msg.className='msg bad';msg.textContent='Presque. La phrase : '+q.map(function(x){return x[0];}).join(' ');}
+            var r=el('div','row');var n=el('button','btn',idx+1>=N?'Résultat':'Suivant');n.addEventListener('click',next);r.appendChild(n);host.appendChild(r);n.focus();
+          }});pcs.appendChild(b);});
+      }
+      var avail=shuffle(q);
+      if(avail.map(function(x){return x[0];}).join()===q.map(function(x){return x[0];}).join()) avail=shuffle(q);
+      draw();
+    }
+  }
+  show();
+}
+function fromHash(){var h=(location.hash||'').replace('#','');var ok=GAMES.some(function(g){return g.id===h;});open(ok?h:'verbes');}
+window.addEventListener('hashchange',fromHash);
+fromHash();
+})();
+</script>
+</html>
